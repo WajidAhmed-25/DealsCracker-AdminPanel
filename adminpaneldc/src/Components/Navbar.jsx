@@ -1,10 +1,13 @@
 // components/Navbar.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import * as LucideIcons from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -19,8 +22,9 @@ function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    // Add your logout logic here
+    Cookies.remove('dealscrackerAdmin-token');
     console.log('Logging out...');
+    navigate('/login');
   };
 
   return (
@@ -28,8 +32,12 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo or brand name can go here */}
-          <div className="flex-shrink-0">
-            <span className="text-xl font-bold text-gray-800">Your Brand</span>
+          <div className="border-2 border-[#267fa2da] rounded-full flex-shrink-0">
+            <img
+              src="/assets/logo.png"
+              alt="Your Brand Logo"
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Profile dropdown */}
@@ -41,7 +49,7 @@ function Navbar() {
               >
                 <div className="relative">
                   <img
-                    src="/api/placeholder/40/40"
+                    src="https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
                     alt="Profile"
                     className="h-10 w-10 rounded-full object-cover border-2 border-gray-200 hover:border-blue-500 transition-colors"
                   />
@@ -58,8 +66,8 @@ function Navbar() {
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="px-4 py-3 border-b">
-                  <p className="text-sm font-medium text-gray-900">John Doe</p>
-                  <p className="text-sm text-gray-500">john@example.com</p>
+                  <p className="text-sm font-medium text-gray-900">Admin</p>
+                  <p className="text-sm text-gray-500">Admin@yopmail.com</p>
                 </div>
                 
                 {/* Dropdown items */}

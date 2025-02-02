@@ -6,19 +6,18 @@ import FoodBrands from './Components/FoodBrands';
 import ClothingBrands from './Components/ClothingBrands';
 import Navbar from './Components/Navbar';
 import LoginPage from './Components/Login/Login';
+import Cookies from "js-cookie";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Protected Route wrapper component
   const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) {
+    const token = Cookies.get("dealscrackerAdmin-token");
+    if (!token) {
       return <Navigate to="/login" replace />;
     }
     return children;
   };
-
   // Layout wrapper component
   const Layout = ({ children }) => (
     <div className="flex flex-col min-h-screen bg-gray-100">
@@ -33,25 +32,24 @@ function App() {
   );
 
   const handleLogin = () => {
-    setIsAuthenticated(true);
+    Cookies.set("dealscrackerAdmin-token", "your-token-value", { expires: 1 }); // Set token with expiry
   };
 
   return (
     <Router>
       <Routes>
-        <Route 
-          path="/login" 
+      <Route
+          path="/login"
           element={
-            isAuthenticated ? 
-              <Navigate to="/contacts" replace /> : 
+            Cookies.get("dealscrackerAdmin-token") ? (
+              <Navigate to="/contacts" replace />
+            ) : (
               <LoginPage onLogin={handleLogin} />
-          } 
+            )
+          }
         />
         
-        <Route
-          path="/"
-          element={<Navigate to="/contacts" replace />}
-        />
+        <Route path="/" element={<Navigate to="/contacts" replace />} />
 
         <Route
           path="/contacts"
@@ -63,7 +61,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/food"
           element={
@@ -74,7 +71,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/clothing"
           element={

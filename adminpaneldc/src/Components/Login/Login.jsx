@@ -1,77 +1,84 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, ShoppingBag } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Eye, EyeOff, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { z } from "zod";
 
-const LoginPage = ({ onLogin }) => {
+// Define validation schema using Zod
+const LoginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+const localUrl = process.env.REACT_APP_API_URL;
+
+const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
-  const [showToast, setShowToast] = useState(false);
-  
-  // Mock credentials - in a real app, this would be handled by your backend
-  const MOCK_EMAIL = "maida@gmail.com";
-  const MOCK_PASSWORD = "maida123";
+
+  useEffect(() => {
+    // If user is already logged in, redirect
+    if (Cookies.get("dealscrackerAdmin-token")) {
+      navigate("/contacts");
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (formData.email === MOCK_EMAIL && formData.password === MOCK_PASSWORD) {
-      setShowToast(true);
-      // Call the onLogin function passed from App.jsx
-      onLogin();
-      
-      // Wait for toast to show before navigating
-      setTimeout(() => {
-        setShowToast(false);
-        navigate('/contacts'); // Navigate to contacts page after successful login
-      }, 1500);
-    } else {
-      alert("Invalid credentials. Please try again.");
+
+    // Validate inputs using Zod
+    const validation = LoginSchema.safeParse(formData);
+    if (!validation.success) {
+      validation.error.errors.forEach((err) => toast.error(err.message));
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${localUrl}/auth/login`, formData);
+
+      // Store token in cookies (expires in 1 day)
+      Cookies.set("dealscrackerAdmin-token", response.data.access_token, {
+        secure: true,
+        sameSite: "strict",
+        expires: 1,
+      });
+
+        toast.success("Login successful!");
+        setTimeout(() => {
+          navigate("/contacts");
+        }, 1000);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Login failed.");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 to-white p-4">
-      {/* Custom Toast Notification */}
-      {showToast && (
-        <div className="fixed top-4 right-4 z-50 animate-fade-in">
-          <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded shadow-lg">
-            <div className="flex items-center">
-              <div className="text-green-500">
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-green-700">Successfully logged in!</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <Toaster />
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-sm">
         <div className="flex flex-col items-center">
           <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
-            <ShoppingBag className="w-8 h-8 text-sky-600" />
+            <ShoppingBag className="w-8 h-8 text-[#267fa2da]" />
           </div>
-          
-          <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-            Login to Continue
-          </h2>
+          <h2 className="mt-6 text-2xl font-semibold text-gray-900">Login to Admin Dashboard</h2>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-5">
+            {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm text-gray-600 mb-1">
                 Email address
@@ -89,6 +96,8 @@ const LoginPage = ({ onLogin }) => {
                 />
               </div>
             </div>
+
+            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm text-gray-600 mb-1">
                 Password
@@ -97,7 +106,7 @@ const LoginPage = ({ onLogin }) => {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={handleChange}
@@ -118,10 +127,11 @@ const LoginPage = ({ onLogin }) => {
               </div>
             </div>
           </div>
-  
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
+            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#267fa2da] hover:bg-[#267fa2da]/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
           >
             Sign in
           </button>

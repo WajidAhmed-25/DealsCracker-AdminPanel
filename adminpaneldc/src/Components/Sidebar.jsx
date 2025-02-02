@@ -35,7 +35,7 @@ function Sidebar({ isOpen, setIsOpen }) {
               to={item.path}
               className={({ isActive }) => `
                 w-full flex items-center p-3 mb-2 rounded-lg transition-colors
-                ${isActive ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}
+                ${isActive ? 'bg-[#267fa2da] text-white' : 'hover:bg-gray-100'}
               `}
             >
               <Icon size={20} />

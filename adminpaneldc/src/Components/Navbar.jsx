@@ -49,7 +49,7 @@ function Navbar() {
               >
                 <div className="relative">
                   <img
-                    src="https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                     alt="Profile"
                     className="h-10 w-10 rounded-full object-cover border-2 border-gray-200 hover:border-blue-500 transition-colors"
                   />
